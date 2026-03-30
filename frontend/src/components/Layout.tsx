@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Network, Home, Trophy, BookOpen, Brain, Sparkles } from 'lucide-react';
+import { Home, Trophy, BookOpen, Brain } from 'lucide-react';
 
 const Sidebar = () => {
   return (
     <div className="w-64 h-screen fixed left-0 top-0 border-r border-white/5 bg-surface/50 backdrop-blur-xl flex flex-col p-6 space-y-8 z-50">
       <div className="flex items-center space-x-3">
         <Brain className="w-8 h-8 text-primary animate-glow" />
-        <span className="text-2xl font-display font-bold text-white tracking-wider">NEXORA</span>
+        <span className="text-2xl font-display font-bold text-white tracking-wider">NEX</span>
       </div>
 
       <nav className="flex-1 space-y-2">
