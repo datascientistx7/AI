@@ -23,6 +23,10 @@ export const topics: Record<string, Topic[]> = {
     { id: 't8', moduleId: 'genai', title: 'Prompt Engineering', completed: false },
     { id: 't9', moduleId: 'genai', title: 'Retrieval Augmented Generation (RAG)', completed: false },
     { id: 't10', moduleId: 'genai', title: 'Diffusion Models', completed: false },
+  ],
+  sql: [
+    { id: 't11', moduleId: 'sql', title: 'SELECT statements', completed: false },
+    { id: 't12', moduleId: 'sql', title: 'Table JOINs', completed: false }
   ]
 };
 
