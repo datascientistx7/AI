@@ -1,14 +1,12 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Trophy, BookOpen, Brain } from 'lucide-react';
+import { Network, Home, Trophy, BookOpen, Brain, Sparkles } from 'lucide-react';
+import { Logo } from './Logo';
 
 const Sidebar = () => {
   return (
     <div className="w-64 h-screen fixed left-0 top-0 border-r border-white/5 bg-surface/50 backdrop-blur-xl flex flex-col p-6 space-y-8 z-50">
-      <div className="flex items-center space-x-3">
-        <Brain className="w-8 h-8 text-primary animate-glow" />
-        <span className="text-2xl font-display font-bold text-white tracking-wider">NEX</span>
-      </div>
+      <Logo />
 
       <nav className="flex-1 space-y-2">
         <NavLink to="/" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
