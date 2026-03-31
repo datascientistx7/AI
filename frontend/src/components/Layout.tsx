@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Network, Home, Trophy, BookOpen, Brain, Sparkles } from 'lucide-react';
+import { Home, Trophy, BookOpen } from 'lucide-react';
 import { Logo } from './Logo';
 
 const Sidebar = () => {
@@ -9,15 +9,15 @@ const Sidebar = () => {
       <Logo />
 
       <nav className="flex-1 space-y-2">
-        <NavLink to="/" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+        <NavLink to="/dashboard" end className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
           <Home className="w-5 h-5" />
           <span className="font-medium">Training Ground</span>
         </NavLink>
-        <NavLink to="/modules" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+        <NavLink to="/dashboard/modules" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
           <BookOpen className="w-5 h-5" />
           <span className="font-medium">Modules</span>
         </NavLink>
-        <NavLink to="/leaderboard" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+        <NavLink to="/dashboard/leaderboard" className={({isActive}) => `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
           <Trophy className="w-5 h-5" />
           <span className="font-medium">Leaderboard</span>
         </NavLink>

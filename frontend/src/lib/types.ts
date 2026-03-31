@@ -1,5 +1,17 @@
 export type ModeType = 'Concept' | 'Lab' | 'Thinking' | 'Design' | 'Exam';
 
+export interface Topic {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export interface SubModule {
+  id: string;
+  title: string;
+  topics: Topic[];
+}
+
 export interface Module {
   id: string;
   title: string;
@@ -7,14 +19,9 @@ export interface Module {
   progress: number;
   icon: string;
   color: string;
+  subModules?: SubModule[];
 }
 
-export interface Topic {
-  id: string;
-  moduleId: string;
-  title: string;
-  completed: boolean;
-}
 
 export interface Mode {
   id: string;

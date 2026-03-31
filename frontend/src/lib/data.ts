@@ -2,33 +2,57 @@ import { Module, Topic, Mode } from './types';
 
 export const modules: Module[] = [
   { id: 'ml', title: 'Machine Learning', description: 'Master algorithms and prediction models', progress: 45, icon: 'Brain', color: '#7aa2f7' },
-  { id: 'dl', title: 'Deep Learning', description: 'Delve into neural networks', progress: 10, icon: 'Network', color: '#bb9af7' },
+  { 
+    id: 'dl', 
+    title: 'Deep Learning', 
+    description: 'Delve into neural networks', 
+    progress: 10, 
+    icon: 'Network', 
+    color: '#bb9af7',
+    subModules: [
+      { id: 'sm1', title: 'Module 1 - What is Deep Learning', topics: [{ id: 't1_1', title: '1. Introduction of Deep L...', completed: false }] },
+      { id: 'sm2', title: 'Module 2 - Neural Network basics', topics: Array(5).fill({ completed: false }).map((_, i) => ({ id: `t2_${i}`, title: `Topic ${i + 1}`, completed: false })) },
+      { id: 'sm3', title: 'Module 3 - Deep Learning Hyperparameters (ANN)', topics: Array(2).fill({ completed: false }).map((_, i) => ({ id: `t3_${i}`, title: `Topic ${i + 1}`, completed: false })) },
+      { id: 'sm4', title: 'Module 4 - Convolutional Neural Network (CNN)', topics: Array(2).fill({ completed: false }).map((_, i) => ({ id: `t4_${i}`, title: `Topic ${i + 1}`, completed: false })) },
+      { id: 'sm5', title: 'Module 5 - Recurrent Neural Network (RNN)', topics: Array(4).fill({ completed: false }).map((_, i) => ({ id: `t5_${i}`, title: `Topic ${i + 1}`, completed: false })) },
+      { id: 'sm6', title: 'Module 6 - Computer Vision (CV)', topics: [{ id: 't6_1', title: 'Topic 1', completed: false }] },
+    ]
+  },
   { id: 'sql', title: 'SQL', description: 'Data querying and manipulation', progress: 80, icon: 'Database', color: '#9ece6a' },
-  { id: 'genai', title: 'Generative AI', description: 'Create art and text with AI', progress: 20, icon: 'Sparkles', color: '#f7768e' },
+  { 
+    id: 'genai', 
+    title: 'GEN AI', 
+    description: 'Create art and text with AI', 
+    progress: 20, 
+    icon: 'Sparkles', 
+    color: '#f7768e',
+    subModules: [
+      { id: 'gsm1', title: 'Foundations', topics: [{ id: 'gt1', title: '1. Introduction to Generative AI', completed: false }, { id: 'gt2', title: '2. Discriminative vs Generative Models', completed: false }] },
+      { id: 'gsm2', title: 'LLM Basics', topics: [{ id: 'gt3', title: '3. Large Language Models (LLMs)', completed: false }, { id: 'gt4', title: '4. Tokenization', completed: false }, { id: 'gt5', title: '5. Transformer Architecture', completed: false }, { id: 'gt6', title: '6. Attention Mechanism', completed: false }] },
+      { id: 'gsm3', title: 'Prompt Engineering', topics: [{ id: 'gt7', title: '7. Prompt Engineering Basics', completed: false }, { id: 'gt8', title: '8. Prompt Patterns', completed: false }] },
+      { id: 'gsm4', title: 'LLM Parameters', topics: [{ id: 'gt9', title: '9. Temperature', completed: false }, { id: 'gt10', title: '10. Context Window', completed: false }] },
+      { id: 'gsm5', title: 'Embeddings', topics: [{ id: 'gt11', title: '11. Embeddings', completed: false }, { id: 'gt12', title: '12. Vector Similarity', completed: false }] },
+      { id: 'gsm6', title: 'Retrieval Systems', topics: [{ id: 'gt13', title: '13. Retrieval Augmented Generation (RAG)', completed: false }] },
+      { id: 'gsm7', title: 'Tools & Frameworks', topics: [{ id: 'gt14', title: '14. LangChain Overview', completed: false }, { id: 'gt15', title: '15. Vector Databases', completed: false }] },
+      { id: 'gsm8', title: 'AI Systems', topics: [{ id: 'gt16', title: '16. AI Chatbots', completed: false }, { id: 'gt17', title: '17. AI Agents', completed: false }] },
+    ]
+  },
 ];
 
 export const topics: Record<string, Topic[]> = {
   ml: [
-    { id: 't1', moduleId: 'ml', title: 'Linear Regression', completed: true },
-    { id: 't2', moduleId: 'ml', title: 'Classification', completed: false },
-    { id: 't3', moduleId: 'ml', title: 'Overfitting', completed: false },
-    { id: 't4', moduleId: 'ml', title: 'Decision Trees', completed: false },
-  ],
-  dl: [
-    { id: 't5', moduleId: 'dl', title: 'Perceptrons', completed: false },
-    { id: 't6', moduleId: 'dl', title: 'CNNs', completed: false },
-  ],
-  genai: [
-    { id: 't7', moduleId: 'genai', title: 'Intro to Large Language Models', completed: true },
-    { id: 't8', moduleId: 'genai', title: 'Prompt Engineering', completed: false },
-    { id: 't9', moduleId: 'genai', title: 'Retrieval Augmented Generation (RAG)', completed: false },
-    { id: 't10', moduleId: 'genai', title: 'Diffusion Models', completed: false },
+    { id: 't1', title: 'Linear Regression', completed: true },
+    { id: 't2', title: 'Classification', completed: false },
+    { id: 't3', title: 'Overfitting', completed: false },
+    { id: 't4', title: 'Decision Trees', completed: false },
   ],
   sql: [
-    { id: 't11', moduleId: 'sql', title: 'SELECT statements', completed: false },
-    { id: 't12', moduleId: 'sql', title: 'Table JOINs', completed: false }
+    { id: 't11', title: 'SELECT statements', completed: false },
+    { id: 't12', title: 'Table JOINs', completed: false }
   ]
 };
+
+
 
 export const modes: Mode[] = [
   { id: 'm1', type: 'Concept', title: 'Understand the Core', character: 'naruto', description: 'Learn the fundamentals with short explanations and visuals.', completed: false, color: 'text-characters-naruto' },

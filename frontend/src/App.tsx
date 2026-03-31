@@ -6,11 +6,13 @@ import { ModulesList } from './pages/ModulesList';
 import { TopicView } from './pages/TopicView';
 import { Leaderboard } from './pages/Leaderboard';
 import { ModeView } from './pages/Mode';
+import { Landing } from './pages/Landing';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<Landing />} />
+      <Route path="/dashboard" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="modules" element={<ModulesList />} />
         <Route path="leaderboard" element={<Leaderboard />} />

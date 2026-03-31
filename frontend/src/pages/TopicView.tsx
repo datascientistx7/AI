@@ -21,7 +21,7 @@ export const TopicView = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto py-10 space-y-12">
-      <Link to={`/modules/${moduleId}`} className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
+      <Link to={`/dashboard/modules/${moduleId}`} className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
         <ChevronLeft className="w-4 h-4" />
         <span>Back to {mod?.title || 'Module'}</span>
       </Link>
@@ -37,7 +37,7 @@ export const TopicView = () => {
           const Icon = CharacterIcons[mode.type];
           return (
             <motion.div key={mode.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className="h-full">
-              <Link to={`/modules/${moduleId}/${topicId}/mode/${mode.type.toLowerCase()}`} className="block h-full">
+              <Link to={`/dashboard/modules/${moduleId}/${topicId}/mode/${mode.type.toLowerCase()}`} className="block h-full">
                 <div className="glass-card hover:-translate-y-2 transition-all p-6 text-center space-y-4 h-full flex flex-col items-center group relative overflow-hidden">
                   <div className={`absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity ${mode.color.replace('text', 'bg')}`} />
                   

@@ -23,7 +23,7 @@ export const ModulesList = () => {
           const Icon = iconMap[mod.icon] || Brain;
           return (
             <motion.div key={mod.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Link to={`/modules/${mod.id}`} className="block h-full">
+              <Link to={`/dashboard/modules/${mod.id}`} className="block h-full">
                 <div className="glass-card glass-card-hover h-full p-8 flex flex-col items-start relative group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
                     <Icon className="w-32 h-32" style={{ color: mod.color }} />

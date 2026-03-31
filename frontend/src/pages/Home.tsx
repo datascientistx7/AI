@@ -44,7 +44,7 @@ export const Home = () => {
               <p className="text-gray-400">Concept Mode (Naruto) • 5 mins remaining</p>
             </div>
           </div>
-          <Link to="/modules/ml/t3" className="z-10">
+          <Link to="/dashboard/modules/ml/t3" className="z-10">
             <button className="bg-primary hover:bg-primary/90 text-[#0d0e15] font-bold py-3 px-6 rounded-xl flex items-center space-x-2 transition-transform active:scale-95 shadow-[0_0_20px_rgba(122,162,247,0.3)]">
               <span>Resume</span>
               <Play className="w-4 h-4 fill-current" />
@@ -57,7 +57,7 @@ export const Home = () => {
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold font-display">Your Modules</h2>
-          <Link to="/modules" className="text-gray-400 hover:text-white flex items-center space-x-2 transition-colors">
+          <Link to="/dashboard/modules" className="text-gray-400 hover:text-white flex items-center space-x-2 transition-colors">
             <span>View All</span>
             <MoveRight className="w-4 h-4" />
           </Link>
@@ -68,7 +68,7 @@ export const Home = () => {
             const Icon = iconMap[mod.icon] || Brain;
             return (
               <motion.div key={mod.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <Link to={`/modules/${mod.id}`} className="block h-full">
+                <Link to={`/dashboard/modules/${mod.id}`} className="block h-full">
                   <div className="glass-card glass-card-hover h-full p-6 flex flex-col items-start relative group">
                     <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110 duration-300">
                       <Icon className="w-24 h-24" style={{ color: mod.color }} />

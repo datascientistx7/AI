@@ -1,50 +1,153 @@
 import { useParams, Link } from 'react-router-dom';
 import { modules, topics } from '../lib/data';
-import { motion } from 'framer-motion';
-import { ChevronRight, Brain, Clock, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, Brain, Clock, CheckCircle, BookOpen, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export const ModuleView = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
   const mod = modules.find((m) => m.id === moduleId);
-  const modTopics = topics[moduleId || ''] || [];
+  const modTopicsFlat = topics[moduleId || ''] || [];
+  const [expandedId, setExpandedId] = useState<string | null>('sm1'); // Default open Module 1 as per image
 
   if (!mod) {
     return <div className="text-white text-center py-20 text-2xl font-display">Module not found</div>;
   }
 
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto py-10">
-      <div className="mb-10 text-center space-y-4 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color)]/20 to-transparent blur-[80px] -z-10" style={{ '--color': mod.color } as React.CSSProperties} />
-        <Brain className="w-16 h-16 mx-auto" style={{ color: mod.color }} />
-        <h1 className="text-5xl font-display font-bold text-white tracking-tight">{mod.title}</h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">{mod.description}</p>
-      </div>
+  const hasSubModules = mod.subModules && mod.subModules.length > 0;
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold font-display text-white mb-6">Topics ({modTopics.length})</h2>
-        {modTopics.map((topic, i) => (
-          <motion.div key={topic.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}>
-            <Link to={`/modules/${mod.id}/${topic.id}`} className="block">
-              <div className="glass-card p-6 flex items-center justify-between group hover:border-[#7aa2f7]/50 transition-colors">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${topic.completed ? 'bg-success/20 text-success border border-success/30' : 'bg-surface/50 text-gray-400 border border-white/10'}`}>
-                    {topic.completed ? <CheckCircle className="w-5 h-5" /> : <span className="font-bold text-sm">{i + 1}</span>}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white group-hover:text-[#7aa2f7] transition-colors">{topic.title}</h3>
-                    <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      <span>~45 mins to complete</span>
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto py-10 px-4 sm:px-6 relative">
+      {/* Background purely aesthetic blobs */}
+      <div className="absolute top-0 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-20 -right-20 w-72 h-72 bg-secondary/10 rounded-full blur-[120px] -z-10" />
+
+      {/* Header section inspired by the provided image */}
+      {hasSubModules ? (
+        <div className="mb-12 space-y-3 relative group">
+          <div className="absolute -inset-x-10 -inset-y-10 bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          
+          <div className="flex items-center space-x-3 text-secondary relative z-10">
+            <div className="p-2 rounded-lg bg-surface/50 border border-white/10">
+              <BookOpen className="w-5 h-5 text-characters-naruto" />
+            </div>
+            <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">CURRENT SUBJECT</span>
+          </div>
+          
+          <div className="relative z-10">
+             <h1 className="text-6xl font-display font-black tracking-tighter text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/60">
+                 {mod.title}
+               </span>
+               <span className="inline-block ml-3 w-3 h-3 rounded-full bg-primary animate-pulse" />
+             </h1>
+             <p className="text-gray-400 text-sm font-medium flex items-center space-x-2">
+               <span className="w-1 h-1 rounded-full bg-gray-600" />
+               <span>{mod.subModules?.length} specialized modules</span>
+             </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-10 text-center space-y-4 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--color)]/20 to-transparent blur-[80px] -z-10" style={{ '--color': mod.color } as React.CSSProperties} />
+          <Brain className="w-16 h-16 mx-auto" style={{ color: mod.color }} />
+          <h1 className="text-5xl font-display font-bold text-white tracking-tight">{mod.title}</h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">{mod.description}</p>
+        </div>
+      )}
+
+      <div className="space-y-5">
+        {hasSubModules ? (
+          mod.subModules?.map((sm, i) => {
+            const isExpanded = expandedId === sm.id;
+            return (
+              <motion.div 
+                key={sm.id} 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className={`overflow-hidden rounded-3xl border transition-all duration-500 ${isExpanded ? 'border-primary/40 bg-surfaceHover/60 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-primary/20' : 'border-white/5 bg-surface/40 hover:bg-surfaceHover/50 hover:border-white/10'}`}
+              >
+                <button 
+                  onClick={() => setExpandedId(isExpanded ? null : sm.id)}
+                  className="w-full text-left p-7 flex items-center justify-between group relative"
+                >
+                  {isExpanded && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary to-secondary" />}
+                  
+                  <div className="relative z-10">
+                    <h3 className={`text-2xl font-black tracking-tight transition-all duration-300 ${isExpanded ? 'text-primary scale-[1.02]' : 'text-white/90 group-hover:text-white'}`}>
+                      {sm.title}
+                    </h3>
+                    <div className="flex items-center space-x-3 mt-1.5">
+                      <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-md ${isExpanded ? 'bg-primary/20 text-primary' : 'bg-white/5 text-gray-500'}`}>
+                        {sm.topics.length} topic{sm.topics.length !== 1 ? 's' : ''}
+                      </span>
+                      {isExpanded && <span className="text-[10px] text-primary/60 font-bold uppercase tracking-wider italic">Active Session</span>}
                     </div>
                   </div>
-                </div>
-                <ChevronRight className="w-6 h-6 text-gray-500 group-hover:text-[#7aa2f7] transform group-hover:translate-x-2 transition-all" />
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+
+                  {isExpanded ? (
+                    <ChevronDown className="w-5 h-5 text-primary" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
+                  )}
+                </button>
+                
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className="px-6 pb-6"
+                    >
+                      <div className="pt-2 border-t border-white/5 flex flex-col space-y-3">
+                        {sm.topics.map((topic) => (
+                           <Link 
+                            key={topic.id} 
+                            to={`/dashboard/modules/${mod.id}/${topic.id}`}
+                            className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all group/topic"
+                           >
+                              <div className="w-5 h-5 rounded-full border-2 border-characters-naruto flex-shrink-0" />
+                              <span className="text-characters-naruto font-bold text-lg group-hover:brightness-125 transition-all">{topic.title}</span>
+                           </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )
+          })
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold font-display text-white mb-6">Topics ({modTopicsFlat.length})</h2>
+            {modTopicsFlat.map((topic, i) => (
+              <motion.div key={topic.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}>
+                <Link to={`/dashboard/modules/${mod.id}/${topic.id}`} className="block">
+                  <div className="glass-card p-6 flex items-center justify-between group hover:border-[#7aa2f7]/50 transition-colors">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${topic.completed ? 'bg-success/20 text-success border border-success/30' : 'bg-surface/50 text-gray-400 border border-white/10'}`}>
+                        {topic.completed ? <CheckCircle className="w-5 h-5" /> : <span className="font-bold text-sm">{i + 1}</span>}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white group-hover:text-[#7aa2f7] transition-colors">{topic.title}</h3>
+                        <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
+                          <Clock className="w-3 h-3" />
+                          <span>~45 mins to complete</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-6 h-6 text-gray-500 group-hover:text-[#7aa2f7] transform group-hover:translate-x-2 transition-all" />
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </>
+        )}
       </div>
     </motion.div>
   );
 };
+
