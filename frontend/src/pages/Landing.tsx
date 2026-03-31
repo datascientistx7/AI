@@ -81,7 +81,7 @@ export const Landing = () => {
             </h1>
             
             <p className="text-xl text-gray-400 leading-relaxed max-w-lg">
-              Nexora transcends traditional learning. Dive into an immersive saga where you don't just study AI—you engineer it. From neural foundations to generative frontiers.
+              Nexora is an all-in-one AI learning platform that guides you from a complete beginner to a proficient engineer. Build real-world projects and master everything from basic algorithms to advanced Generative AI.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-6 pt-4">
@@ -242,7 +242,7 @@ export const Landing = () => {
               The AI revolution <br /> won't wait. <span className="text-primary italic">Will you?</span>
              </h4>
              <p className="text-xl text-gray-400 max-w-xl mx-auto">
-              Join thousands of students who are building their future today. One mission at a time.
+              Start your journey today and master the future of technology, one step at a time.
              </p>
           </div>
 
