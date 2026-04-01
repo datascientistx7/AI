@@ -2,8 +2,13 @@ import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Home, Trophy, BookOpen } from 'lucide-react';
 import { Logo } from './Logo';
+import { useProgress } from '../lib/progress';
 
 const Sidebar = () => {
+  const { getSummary } = useProgress();
+  const summary = getSummary();
+  const levelProgress = summary.xp % 150;
+
   return (
     <div className="w-64 h-screen fixed left-0 top-0 border-r border-white/5 bg-surface/50 backdrop-blur-xl flex flex-col p-6 space-y-8 z-50">
       <Logo />
@@ -26,12 +31,12 @@ const Sidebar = () => {
       <div className="mt-8 p-4 rounded-xl bg-gradient-to-br from-surfaceHover to-surface border border-white/5 relative overflow-hidden group">
         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="relative z-10 flex flex-col space-y-2">
-          <span className="text-xs text-secondary font-bold uppercase tracking-widest">Level 12</span>
-          <span className="text-sm text-gray-300">Chunin</span>
+          <span className="text-xs text-secondary font-bold uppercase tracking-widest">Level {summary.level}</span>
+          <span className="text-sm text-gray-300">{summary.levelTitle}</span>
           <div className="w-full bg-background rounded-full h-1.5 mt-2 overflow-hidden">
-            <div className="bg-gradient-to-r from-primary to-secondary h-full w-3/4 rounded-full" />
+            <div className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all" style={{ width: `${(levelProgress / 150) * 100}%` }} />
           </div>
-          <p className="text-xs text-gray-500 mt-2">1,200 / 2,000 XP</p>
+          <p className="text-xs text-gray-500 mt-2">{summary.xp} XP • {summary.completedModes}/{summary.totalModes} modes cleared</p>
         </div>
       </div>
     </div>

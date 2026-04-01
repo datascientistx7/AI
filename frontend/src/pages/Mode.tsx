@@ -1,389 +1,568 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { ChevronLeft, Maximize2, MoveRight, HelpCircle, Activity } from 'lucide-react';
-import { topics, modes, modules } from '../lib/data';
+import { useMemo, useState, type CSSProperties } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Activity,
+  CheckCircle2,
+  ChevronLeft,
+  HelpCircle,
+  Maximize2,
+  MoveRight,
+  RotateCcw,
+  Trophy,
+} from 'lucide-react';
+import { allContent } from '../lib/content-index';
+import { getTopicById, modes, modules } from '../lib/data';
+import { PASSING_SCORE, getTopicSequenceForModule, useProgress } from '../lib/progress';
+import type { ModeType, QuizQuestion, TopicModeContent } from '../lib/types';
 
-// --- MOCK COMPONENTS FOR EACH MODE ---
-import { mlContent } from '../lib/ml-content';
+function getModeNavigation(moduleId: string, topicId: string, modeType: ModeType) {
+  const topicSequence = getTopicSequenceForModule(moduleId);
+  const topicIndex = topicSequence.findIndex((topic) => topic.id === topicId);
+  const modeIndex = modes.findIndex((mode) => mode.type === modeType);
 
-const ConceptMode = ({ title, content }: { title: string, content?: any }) => {
-  const [flipped, setFlipped] = useState(false);
-  return (
-  <div className="space-y-6">
-    <div className="glass-card p-8 border-l-4 border-characters-naruto">
-      <h3 className="text-2xl font-display font-bold text-white mb-4">The Ninja Way of {title}</h3>
-      <p className="text-gray-300 leading-relaxed text-lg mb-6">
-        {content?.explanation || `Imagine you're training under Naruto. You don't just memorize the jutsu; you understand the chakra flow. In ${title}, the core philosophy is balance. You have parameters learning from data, much like shadow clones.`}
-      </p>
-      
-      <a href="https://gemini.google.com/gem/1OJ_BILMH4moZ8I13Dqj7FYpyB1s59byx?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 bg-characters-naruto hover:bg-opacity-90 text-[#0d0e15] font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(255,158,100,0.4)]">
-        <Activity className="w-5 h-5" />
-        <span>Summon Concept Sensei (Gemini Gem)</span>
-      </a>
-    </div>
-    <div className="grid grid-cols-2 gap-6">
-      <div className="glass-card p-6 bg-surface/30 flex flex-col justify-center items-center h-48 border border-white/5 text-center relative overflow-hidden group">
-        <div className="absolute inset-0 bg-characters-naruto/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <Activity className="w-12 h-12 text-characters-naruto mb-4 group-hover:scale-110 transition-transform duration-500" />
-        <p className="font-bold text-white relative z-10">{content?.graphTitle || 'Chakra Network (Graph)'}</p>
-        <span className="text-xs text-characters-naruto mt-2 tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Visual Model</span>
-      </div>
-      <div 
-         className="glass-card p-6 bg-surface/30 flex flex-col justify-center items-center h-48 border border-white/5 text-center cursor-pointer group hover:border-characters-naruto/50 transition-all relative"
-         onClick={() => setFlipped(!flipped)}
-      >
-        <AnimatePresence mode="wait">
-          {!flipped ? (
-            <motion.div key="front" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center">
-               <HelpCircle className="w-12 h-12 text-white/50 mb-4 group-hover:text-characters-naruto transition-colors" />
-               <p className="font-bold text-white">Interactive Metaphor</p>
-               <span className="text-xs text-gray-500 mt-2 tracking-widest uppercase">Click to Reveal</span>
-            </motion.div>
-          ) : (
-            <motion.div key="back" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-               <p className="font-bold text-characters-naruto text-sm leading-relaxed max-w-xs">{content?.analogy || 'Analogy (Metaphor)'}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  </div>
-)};
+  const resolveStep = (direction: -1 | 1) => {
+    let nextTopicIndex = topicIndex;
+    let nextModeIndex = modeIndex + direction;
 
-const LabMode = ({ content, topicId }: { content?: any, topicId?: string }) => {
-  const [sliderVal, setSliderVal] = useState(50);
-  
-  const renderInteractiveGraphic = () => {
-    switch(topicId) {
-      case 't1': // Linear Regression
-        const slope = (sliderVal - 50) / 25; // mapped roughly
-        return (
-          <svg className="w-full h-full p-8" viewBox="0 0 100 100" overflow="visible">
-             <circle cx="20" cy="80" r="3" fill="#fff" opacity="0.8"/>
-             <circle cx="40" cy="60" r="3" fill="#fff" opacity="0.8"/>
-             <circle cx="60" cy="50" r="3" fill="#fff" opacity="0.8"/>
-             <circle cx="80" cy="20" r="3" fill="#fff" opacity="0.8"/>
-             <line x1="0" y1={50 + slope * 50} x2="100" y2={50 - slope * 50} stroke="#f7768e" strokeWidth="3" className="transition-all duration-300" />
-          </svg>
-        );
-      case 't2': // Classification
-        const threshold = sliderVal;
-        return (
-          <svg className="w-full h-full" viewBox="0 0 100 100">
-             <rect x="0" y="0" width={threshold} height="100" fill="#f7768e" opacity="0.1" className="transition-all duration-300"/>
-             <rect x={threshold} y="0" width={100 - threshold} height="100" fill="#7aa2f7" opacity="0.1" className="transition-all duration-300"/>
-             
-             {/* Class A points */}
-             <circle cx="20" cy="30" r="4" fill="#f7768e" />
-             <circle cx="35" cy="70" r="4" fill="#f7768e" />
-             <circle cx="45" cy="50" r="4" fill="#f7768e" />
-             {/* Class B points */}
-             <circle cx="60" cy="30" r="4" fill="#7aa2f7" />
-             <circle cx="80" cy="80" r="4" fill="#7aa2f7" />
-             <circle cx="90" cy="40" r="4" fill="#7aa2f7" />
-             
-             <line x1={threshold} y1="0" x2={threshold} y2="100" stroke="#fff" strokeWidth="2" strokeDasharray="4" className="transition-all duration-300" />
-          </svg>
-        );
-      case 't3': // Overfitting
-        return (
-          <svg className="w-full h-full p-4" viewBox="0 0 100 100" preserveAspectRatio="none">
-             <circle cx="10" cy="20" r="3" fill="#fff" />
-             <circle cx="30" cy="65" r="3" fill="#fff" />
-             <circle cx="50" cy="80" r="3" fill="#fff" />
-             <circle cx="70" cy="65" r="3" fill="#fff" />
-             <circle cx="90" cy="20" r="3" fill="#fff" />
-             {/* Dynamic Curve depending on complexity slider */}
-             {sliderVal < 33 ? (
-                // Underfit (straight line)
-                <line x1="0" y1="50" x2="100" y2="50" stroke="#f7768e" strokeWidth="3" className="transition-all" />
-             ) : sliderVal < 66 ? (
-                // Good fit (parabola)
-                <path d="M 0 0 Q 50 160 100 0" fill="transparent" stroke="#9ece6a" strokeWidth="3" />
-             ) : (
-                // Overfit (zig zag to hit points exactly)
-                <path d="M 10 20 L 30 65 L 50 80 L 70 65 L 90 20" fill="transparent" stroke="#f7768e" strokeWidth="3" />
-             )}
-          </svg>
-        );
-      case 't4': // Decision Trees
-        const depth = Math.floor(sliderVal / 25);
-        return (
-          <div className="w-full h-full flex flex-col items-center py-6">
-             <div className="w-32 h-10 bg-surface border-2 border-[#f7768e] rounded-xl flex items-center justify-center font-bold text-xs">Root Splitting</div>
-             {depth >= 1 && (
-               <div className="flex w-full justify-around mt-6 relative">
-                 <div className="absolute top-[-24px] left-[25%] w-[1px] h-6 bg-white/20 transform rotate-[-45deg]"></div>
-                 <div className="absolute top-[-24px] right-[25%] w-[1px] h-6 bg-white/20 transform rotate-[45deg]"></div>
-                 <div className="w-24 h-8 bg-surface border-2 border-[#f7768e] rounded-xl"></div>
-                 <div className="w-24 h-8 bg-surface border-2 border-[#f7768e] rounded-xl"></div>
-               </div>
-             )}
-             {depth >= 2 && (
-               <div className="flex w-full justify-around px-8 mt-6">
-                 <div className="w-12 h-6 bg-surface border border-[#f7768e] rounded-lg"></div>
-                 <div className="w-12 h-6 bg-surface border border-[#f7768e] rounded-lg"></div>
-                 <div className="w-12 h-6 bg-surface border border-[#f7768e] rounded-lg"></div>
-                 <div className="w-12 h-6 bg-surface border border-[#f7768e] rounded-lg"></div>
-               </div>
-             )}
-             {depth >= 3 && (
-               <div className="text-[#f7768e] font-bold text-sm mt-8 animate-pulse shadow-[0_0_10px_rgba(247,118,142,0.5)] p-2 rounded-lg">Over-fragmented Leaf Nodes Reached!</div>
-             )}
-          </div>
-        );
-      case 't5': // Perceptron
-        const fire = sliderVal > 60;
-        return (
-          <svg className="w-full h-full p-6" viewBox="0 0 100 100" overflow="visible">
-             <circle cx="20" cy="20" r="10" fill="#24283b" stroke="#7aa2f7" strokeWidth="2" />
-             <circle cx="20" cy="50" r="10" fill="#24283b" stroke="#7aa2f7" strokeWidth="2" />
-             <circle cx="20" cy="80" r="10" fill="#24283b" stroke="#7aa2f7" strokeWidth="2" />
-             <circle cx="80" cy="50" r="15" fill={fire ? "#e0af68" : "#24283b"} stroke="#e0af68" strokeWidth="3" className="transition-all duration-300" />
-             <line x1="30" y1="20" x2="65" y2="45" stroke="#7aa2f7" strokeWidth={sliderVal/20} opacity="0.6" className="transition-all" />
-             <line x1="30" y1="50" x2="65" y2="50" stroke="#7aa2f7" strokeWidth={sliderVal/15} opacity="0.6" className="transition-all" />
-             <line x1="30" y1="80" x2="65" y2="55" stroke="#7aa2f7" strokeWidth={sliderVal/20} opacity="0.6" className="transition-all" />
-          </svg>
-        );
-      case 't6': // CNN
-        return (
-          <div className="w-full h-full flex items-center justify-center p-4 relative">
-             <div className="grid grid-cols-5 gap-1 w-48 h-48 bg-white/5 p-1 rounded-xl">
-               {[...Array(25)].map((_, i) => <div key={i} className="bg-white/10 rounded-sm"></div>)}
-             </div>
-             <div className="absolute border-4 border-[#9ece6a] rounded-lg shadow-[0_0_15px_rgba(158,206,106,0.5)] transition-all duration-300 ease-in-out z-10"
-                  style={{ width: '3.3rem', height: '3.3rem', top: `calc(15% + ${Math.floor((sliderVal/100)*3) * 1.05}rem)`, left: `calc(32% + ${((sliderVal % 30)/30)*3 * 1.05}rem)` }}>
-             </div>
-          </div>
-        );
-      case 't7': // LLM (Transformers)
-        const layers = Math.max(1, Math.floor(sliderVal/20));
-        return (
-           <div className="w-full h-full flex flex-col items-center justify-center py-4 space-y-2">
-              <div className="px-4 py-2 border border-[#bb9af7] text-[#bb9af7] rounded-full text-xs font-bold">Word Embeddings</div>
-              {[...Array(layers)].map((_, i) => (
-                <div key={i} className="w-32 h-6 bg-[#bb9af7]/20 border border-[#bb9af7] rounded flex items-center justify-center animate-pulse">
-                   <span className="text-[8px] text-[#bb9af7]">Self-Attention {i+1}</span>
-                </div>
-              ))}
-              <div className="text-white text-sm font-bold mt-2 pt-2 border-t border-white/20">Next Token Probabilities</div>
-           </div>
-        );
-      case 't8': // Prompt Engineering
-        const chaos = sliderVal / 100;
-        return (
-           <div className="w-full h-full flex items-center justify-center p-6 relative overflow-hidden">
-              <span className="text-4xl text-white font-bold tracking-widest z-10 mix-blend-difference">Output Engine</span>
-              {[...Array(20)].map((_, i) => (
-                <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-[#f7768e]"
-                  animate={{ x: (Math.random() - 0.5) * 300 * chaos, y: (Math.random() - 0.5) * 200 * chaos, scale: 1 + Math.random() * chaos * 3, opacity: 0.2 + (chaos * 0.8) }}
-                  transition={{ duration: 0.5 + Math.random(), repeat: Infinity, repeatType: 'reverse' }}
-                />
-              ))}
-           </div>
-        );
-      case 't9': // RAG
-        const dist = sliderVal;
-        return (
-          <svg className="w-full h-full" viewBox="0 0 100 100">
-             <rect x="5" y="40" width="20" height="20" rx="4" fill="transparent" stroke="#7aa2f7" strokeWidth="2" />
-             <text x="15" y="52" fill="#7aa2f7" fontSize="5" textAnchor="middle">Query</text>
-             <rect x="75" y="40" width="20" height="20" rx="4" fill="transparent" stroke="#e0af68" strokeWidth="2" />
-             <text x="85" y="52" fill="#e0af68" fontSize="5" textAnchor="middle">LLM</text>
-             <path d="M 40 20 Q 50 10 60 20 L 60 80 Q 50 90 40 80 Z" fill="transparent" stroke="#9ece6a" strokeWidth="2"/>
-             <text x="50" y="52" fill="#9ece6a" fontSize="5" textAnchor="middle" transform="rotate(-90 50 50)">Vector DB</text>
-             {dist > 30 && (
-                <rect x={50 + (dist-30)/2} y="35" width="8" height="10" fill="#fff" className="transition-all duration-300" opacity={dist > 80 ? 0 : 1} />
-             )}
-          </svg>
-        );
-      case 't10': // Diffusion
-        const noise = 100 - sliderVal;
-        return (
-          <div className="w-full h-full flex items-center justify-center bg-black rounded-b-xl border border-white/5">
-             <div className="w-32 h-32 relative overflow-hidden rounded-xl border border-white/20">
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#bb9af7] to-[#7aa2f7] rounded-full transform scale-75 opacity-100 shadow-[0_0_20px_#bb9af7]"></div>
-                <div className="absolute inset-0 bg-black transition-opacity duration-300 z-20" style={{ opacity: noise/100 * 0.9 }}></div>
-                <div className="absolute inset-0 mix-blend-overlay opacity-50 z-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E")' }}></div>
-             </div>
-          </div>
-        );
-      case 't11': // SQL Select
-        return (
-          <div className="w-full h-full flex flex-col items-center justify-center p-4">
-            <div className="flex w-full mb-2 bg-[#9ece6a]/20 p-2 font-bold text-[#9ece6a] text-xs rounded">
-               <div className="flex-1">ID</div><div className="flex-1">Name</div><div className="flex-1">Value</div>
-            </div>
-            {[10, 30, 50, 70, 90].map((val, i) => (
-               <div key={i} className={`flex w-full p-2 border-b border-white/10 text-xs text-gray-400 transition-all duration-500 ${val > sliderVal ? 'opacity-100 scale-100 bg-white/5' : 'opacity-10 scale-95'}`}>
-                 <div className="flex-1">#{i+1}</div><div className="flex-1">Row {i}</div><div className="flex-1 text-white">{val}</div>
-               </div>
-            ))}
-          </div>
-        );
-      case 't12': // Sql JOINS
-        const overlap = sliderVal / 2; // up to 50
-        return (
-          <svg className="w-full h-full" viewBox="0 0 100 100" overflow="visible">
-             <circle cx={40 + overlap/2} cy="50" r="25" fill="#7aa2f7" opacity="0.4" className="transition-all duration-500" />
-             <text x={25 + overlap/2} y="52" fill="#fff" fontSize="6">Table A</text>
-             <circle cx={90 - overlap} cy="50" r="25" fill="#f7768e" opacity="0.4" className="transition-all duration-500" />
-             <text x={95 - overlap} y="52" fill="#fff" fontSize="6">Table B</text>
-             {sliderVal > 70 && <text x="50" y="85" fill="#9ece6a" fontSize="6" textAnchor="middle" className="animate-pulse">INNER JOIN MATCH</text>}
-          </svg>
-        );
-      default:
-        return (
-         <div className="w-full h-full p-8 flex items-end space-x-2">
-            {[...Array(20)].map((_, i) => (
-              <motion.div key={i} className="flex-1 bg-characters-goko" 
-                animate={{ height: `${Math.max(10, 100 - (i * (sliderVal/10)))}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            ))}
-         </div>
-        );
+    if (nextModeIndex < 0) {
+      nextTopicIndex -= 1;
+      if (nextTopicIndex < 0) return null;
+      nextModeIndex = modes.length - 1;
     }
+
+    if (nextModeIndex >= modes.length) {
+      nextTopicIndex += 1;
+      if (nextTopicIndex >= topicSequence.length) return null;
+      nextModeIndex = 0;
+    }
+
+    const nextTopic = topicSequence[nextTopicIndex];
+    const nextMode = modes[nextModeIndex];
+
+    return {
+      href: `/dashboard/modules/${moduleId}/${nextTopic.id}/mode/${nextMode.type.toLowerCase()}`,
+      topicTitle: nextTopic.title,
+      modeType: nextMode.type,
+    };
+  };
+
+  return { previous: resolveStep(-1), next: resolveStep(1) };
+}
+
+const moduleLabColors: Record<string, string> = {
+  ml: '#7aa2f7',
+  dl: '#bb9af7',
+  genai: '#f7768e',
+  sql: '#9ece6a',
+  agentic: '#e0af68',
+};
+
+function getModuleKey(topicId: string) {
+  return topicId.split('_')[0] || 'ml';
+}
+
+function getLabInsight(topicId: string, sliderVal: number) {
+  if (topicId.startsWith('ml_')) {
+    return sliderVal < 35
+      ? 'The model is too simple and misses structure.'
+      : sliderVal > 70
+        ? 'Complexity is high. Watch for unstable or fragmented behavior.'
+        : 'This is the stable middle zone where the pattern often fits best.';
   }
+
+  if (topicId.startsWith('dl_')) {
+    return sliderVal > 60
+      ? 'The network is activating more strongly and deeper signals are passing through.'
+      : 'Lower settings make the network more conservative and weaker signals fade.';
+  }
+
+  if (topicId.startsWith('genai_')) {
+    return sliderVal > 60
+      ? 'The model is exploring more context, variability, or retrieval depth.'
+      : 'The system is staying tighter, more focused, and more deterministic.';
+  }
+
+  if (topicId.startsWith('sql_')) {
+    return sliderVal > 60
+      ? 'The query is processing a heavier workload or stricter threshold.'
+      : 'The query remains lightweight and easier to reason about.';
+  }
+
+  if (topicId.startsWith('agentic_')) {
+    return sliderVal > 60
+      ? 'The agent is handling more steps, memory, or coordination overhead.'
+      : 'The workflow stays compact with fewer tools or loop iterations.';
+  }
+
+  return 'Use the slider to see how system behavior shifts.';
+}
+
+function renderLabScene(topicId: string, sliderVal: number) {
+  if (topicId.startsWith('ml_')) {
+    if (topicId === 'ml_t1') {
+      const slope = (sliderVal - 50) / 22;
+      return (
+        <svg className="w-full h-full p-6" viewBox="0 0 100 100">
+          {[{ x: 18, y: 74 }, { x: 32, y: 63 }, { x: 52, y: 48 }, { x: 68, y: 36 }, { x: 84, y: 22 }].map((point, i) => (
+            <circle key={i} cx={point.x} cy={point.y} r="3" fill="#fff" opacity="0.8" />
+          ))}
+          <line x1="10" y1={70 + slope * 8} x2="90" y2={30 - slope * 8} stroke="#7aa2f7" strokeWidth="3" />
+        </svg>
+      );
+    }
+
+    return (
+      <div className="w-full h-full flex items-end justify-center gap-4 p-8">
+        {[30, 45, 60, 78].map((value, i) => (
+          <div
+            key={i}
+            className={`w-16 rounded-t-xl ${value <= sliderVal ? 'bg-[#7aa2f7]' : 'bg-white/10'}`}
+            style={{ height: `${value * 1.5}px` }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (topicId.startsWith('dl_')) {
+    const fire = sliderVal > 55;
+
+    return (
+      <svg className="w-full h-full p-6" viewBox="0 0 100 100">
+        {[20, 50, 80].map((y) => (
+          <circle key={y} cx="18" cy={y} r="8" fill="#24283b" stroke="#bb9af7" strokeWidth="2" />
+        ))}
+        <circle cx="78" cy="50" r="14" fill={fire ? '#bb9af7' : '#24283b'} stroke="#bb9af7" strokeWidth="3" />
+        {[20, 50, 80].map((y, i) => (
+          <line key={i} x1="26" y1={y} x2="64" y2="50" stroke="#bb9af7" strokeWidth={2 + sliderVal / 25} opacity="0.55" />
+        ))}
+      </svg>
+    );
+  }
+
+  if (topicId.startsWith('genai_')) {
+    const layers = Math.max(1, Math.floor(sliderVal / 20));
+
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+        {[...Array(layers)].map((_, i) => (
+          <div key={i} className="w-44 h-8 rounded-full border border-[#f7768e] bg-[#f7768e]/15 flex items-center justify-center text-xs text-white">
+            Attention Head {i + 1}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (topicId.startsWith('sql_')) {
+    return (
+      <div className="w-full h-full flex flex-col justify-center gap-2 p-8">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className={`h-8 rounded-lg border px-4 flex items-center ${
+              i < Math.max(1, Math.floor(sliderVal / 18))
+                ? 'border-[#9ece6a] bg-[#9ece6a]/20 text-white'
+                : 'border-white/10 bg-white/5 text-gray-500'
+            }`}
+          >
+            row_{i + 1} - status = active
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full flex items-center justify-center gap-4 p-8">
+      {['Goal', 'Act', 'Observe', sliderVal > 55 ? 'Reflect' : 'Respond'].map((step, i) => (
+        <div key={step} className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full border border-[#e0af68] bg-[#e0af68]/10 flex items-center justify-center text-xs text-center text-white">
+            {step}
+          </div>
+          {i < 3 && <MoveRight className="text-[#e0af68]" />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ConceptMode({ title, content }: { title: string; content?: TopicModeContent | null }) {
+  const [flipped, setFlipped] = useState(false);
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-card p-8 border-l-4 border-characters-naruto">
+        <h3 className="text-2xl font-display font-bold text-white mb-4">Concept Brief: {title}</h3>
+        <p className="text-gray-300 leading-relaxed text-lg mb-6">{content?.concept?.explanation || 'Build intuition first, then formulas.'}</p>
+
+        <div className="inline-flex items-center gap-2 rounded-full border border-characters-naruto/30 bg-characters-naruto/10 px-4 py-2 text-sm text-characters-naruto">
+          <Activity className="w-4 h-4" />
+          <span>Focus on understanding the core idea before moving ahead.</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-card p-6 bg-surface/30 flex flex-col justify-center items-center h-48 border border-white/5 text-center">
+          <Activity className="w-12 h-12 text-characters-naruto mb-4" />
+          <p className="font-bold text-white">{content?.concept?.graphTitle || 'Core topic graph'}</p>
+        </div>
+
+        <button
+          className="glass-card p-6 bg-surface/30 flex flex-col justify-center items-center h-48 border border-white/5 text-center hover:border-characters-naruto/50 transition-all"
+          onClick={() => setFlipped((current) => !current)}
+        >
+          <AnimatePresence mode="wait">
+            {flipped ? (
+              <motion.p
+                key="back"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                className="font-bold text-characters-naruto text-sm leading-relaxed max-w-xs"
+              >
+                {content?.concept?.analogy || 'Topic analogy'}
+              </motion.p>
+            ) : (
+              <motion.div
+                key="front"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                className="flex flex-col items-center"
+              >
+                <HelpCircle className="w-12 h-12 text-white/50 mb-4" />
+                <p className="font-bold text-white">Interactive Metaphor</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LabMode({ content, topicId }: { content?: TopicModeContent | null; topicId: string }) {
+  const [sliderVal, setSliderVal] = useState(50);
+  const accent = moduleLabColors[getModuleKey(topicId)] ?? '#f7768e';
 
   return (
     <div className="space-y-6">
       <div className="glass-card p-8 border-l-4 border-characters-goko">
-        <h3 className="text-2xl font-display font-bold text-white mb-4">Hyperbolic Time Chamber</h3>
-        <p className="text-gray-300 leading-relaxed mb-6">{content?.instruction || 'Adjust the learning rate and observe the model training. What do you notice?'}</p>
-        <div className="space-y-4 max-w-md mb-8">
-          <label className="text-sm font-bold text-gray-400">{content?.label || 'Learning Rate'}: {sliderVal}</label>
-          <input type="range" min="1" max="100" value={sliderVal} onChange={e => setSliderVal(parseInt(e.target.value))} className="w-full h-2 bg-surfaceHover rounded-lg appearance-none cursor-pointer accent-characters-goko" />
+        <h3 className="text-2xl font-display font-bold text-white mb-4">Interactive Lab</h3>
+        <p className="text-gray-300 leading-relaxed mb-6">{content?.lab?.instruction || 'Adjust the control and inspect the behavior change.'}</p>
+
+        <div className="space-y-4 max-w-md mb-6">
+          <label className="text-sm font-bold text-gray-400">
+            {content?.lab?.label || 'Control'}: {sliderVal}
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={sliderVal}
+            onChange={(e) => setSliderVal(parseInt(e.target.value, 10))}
+            className="w-full h-2 bg-surfaceHover rounded-lg appearance-none cursor-pointer accent-characters-goko"
+          />
         </div>
-        
-        <a href="https://gemini.google.com/gem/1Sj47-XyfbV2dMCfNE8NWgAxehTPLEFQu?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 bg-characters-goko hover:bg-opacity-90 text-[#0d0e15] font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(247,118,142,0.4)]">
-          <Activity className="w-5 h-5" />
-          <span>Summon Lab Sensei (Gemini Gem)</span>
-        </a>
+
+        <div className="rounded-2xl border border-white/10 bg-surface/40 px-4 py-3 text-sm text-gray-300">
+          <span className="font-bold" style={{ color: accent }}>
+            Simulation Insight:
+          </span>{' '}
+          {getLabInsight(topicId, sliderVal)}
+        </div>
       </div>
-      <div className="glass-card h-64 border border-white/5 flex items-center justify-center relative overflow-hidden bg-black/20">
+
+      <div className="glass-card h-72 border border-white/5 flex items-center justify-center relative overflow-hidden bg-black/20 p-6">
         <div className="absolute inset-0 bg-grid-white/[0.02]" />
-        {renderInteractiveGraphic()}
+        {renderLabScene(topicId, sliderVal)}
       </div>
     </div>
   );
-};
+}
 
-const ThinkingMode = ({ content }: { content?: any }) => {
+function ThinkingMode({ content }: { content?: TopicModeContent | null }) {
   const [selected, setSelected] = useState<number | null>(null);
-  const options = content?.options || ['Quantize the model weights', 'Increase server size', 'Ignore it, speed doesn\'t matter'];
-  
-  return (
-   <div className="space-y-6">
-    <div className="glass-card p-8 border-l-4 border-characters-toji">
-      <h3 className="text-2xl font-display font-bold text-white mb-4">Tactical Assessment</h3>
-      <p className="text-gray-300 leading-relaxed mb-8">
-        {content?.scenario || "You're deploying a model in production, but latency is extremely high. The payload is heavy. What's your next move?"}
-      </p>
-      <div className="space-y-4 mb-8">
-        {options.map((option: string, i: number) => {
-          const isSelected = selected === i;
-          const isCorrect = isSelected && content?.correctIndex === i;
-          const isWrong = isSelected && content?.correctIndex !== i;
-          return (
-            <button key={i} onClick={() => setSelected(i)} className={`w-full text-left p-4 rounded-xl border transition-colors text-gray-200 ${isCorrect ? 'border-success bg-success/10 text-success' : isWrong ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 hover:border-characters-toji hover:bg-characters-toji/10'}`}>
-              {option}
-            </button>
-          )
-        })}
-      </div>
-      
-      <a href="https://gemini.google.com/gem/1cBFpx-dUISq_tBVMmJGhwuz2AcJLUplo?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 bg-characters-toji hover:bg-opacity-90 text-[#0d0e15] font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(158,206,106,0.4)]">
-        <Activity className="w-5 h-5" />
-        <span>Summon Thinking Sensei (Gemini Gem)</span>
-      </a>
-    </div>
-  </div>
-)};
 
-const DesignMode = ({ content }: { content?: string[] }) => {
-  const blocks = content || ["User Request", "API Gateway", "Drop Model Here"];
   return (
-    <div className="space-y-6 flex flex-col items-center">
-      <div className="glass-card w-full p-8 border-l-4 border-characters-luffy text-center">
-        <h3 className="text-2xl font-display font-bold text-white mb-4">Architect the Grand Line</h3>
-        <p className="text-gray-300 mb-6">Drag and connect blocks to design the system flow.</p>
-        
-        <a href="https://gemini.google.com/gem/13NM9fZdkkzi946oKrBdcCDqKckuRpfnH?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 bg-characters-luffy hover:bg-opacity-90 text-[#0d0e15] font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(224,175,104,0.4)]">
-          <Activity className="w-5 h-5" />
-          <span>Summon Design Sensei (Gemini Gem)</span>
-        </a>
+    <div className="space-y-6">
+      <div className="glass-card p-8 border-l-4 border-characters-toji">
+        <h3 className="text-2xl font-display font-bold text-white mb-4">Scenario Practice</h3>
+        <p className="text-gray-300 leading-relaxed mb-8">{content?.thinking?.scenario || 'Evaluate the scenario and choose the strongest answer.'}</p>
+
+        <div className="space-y-4">
+          {(content?.thinking?.options || []).map((option, i) => {
+            const selectedNow = selected === i;
+            const isCorrect = selectedNow && content?.thinking?.correctIndex === i;
+            const isWrong = selectedNow && content?.thinking?.correctIndex !== i;
+
+            return (
+              <button
+                key={i}
+                onClick={() => setSelected(i)}
+                className={`w-full text-left p-4 rounded-xl border transition-colors ${
+                  isCorrect
+                    ? 'border-success bg-success/10 text-success'
+                    : isWrong
+                      ? 'border-accent bg-accent/10 text-accent'
+                      : 'border-white/10 text-gray-200 hover:border-characters-toji hover:bg-characters-toji/10'
+                }`}
+              >
+                {option}
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <div className="flex space-x-4 items-center flex-wrap justify-center py-10 w-full glass-card min-h-[300px]">
+    </div>
+  );
+}
+
+function DesignMode({ content }: { content?: TopicModeContent | null }) {
+  const blocks = content?.design || ['Input', 'Process', 'Output'];
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-card p-8 border-l-4 border-characters-luffy">
+        <h3 className="text-2xl font-display font-bold text-white mb-4">System Flow</h3>
+        <p className="text-gray-300 mb-6">Use this mode to understand how the topic fits into a larger workflow.</p>
+      </div>
+
+      <div className="glass-card min-h-[240px] flex items-center justify-center p-8">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           {blocks.map((block, i) => (
-            <div key={i} className="flex items-center space-x-4">
-              <div className="p-4 border border-characters-luffy/50 bg-surface rounded-xl font-bold w-40 text-center shadow-[0_0_15px_rgba(224,175,104,0.1)] hover:scale-105 transition-transform cursor-pointer">
+            <div key={`${block}-${i}`} className="flex items-center gap-4">
+              <div className="px-5 py-4 rounded-xl border border-characters-luffy/40 bg-surface/60 text-white font-bold text-center min-w-[170px]">
                 {block}
               </div>
-              {i < blocks.length - 1 && <MoveRight className="text-characters-luffy w-8 h-8" />}
+              {i < blocks.length - 1 && <MoveRight className="text-characters-luffy w-6 h-6" />}
             </div>
           ))}
+        </div>
       </div>
     </div>
   );
-};
+}
 
-const ExamMode = ({ content }: { content?: any }) => (
-  <div className="space-y-6">
-    <div className="glass-card p-8 border-l-4 border-characters-gojo">
-      <h3 className="text-2xl font-display font-bold text-white mb-4">Domain Expansion: Infinite Void</h3>
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-gray-300">Question 1/5</p>
-        <span className="text-characters-gojo font-bold font-display text-2xl tracking-widest">04:59</span>
+function buildQuiz(topicId: string, topicTitle: string, content?: TopicModeContent | null): QuizQuestion[] {
+  if (!content) return [];
+  if (content.quiz?.length) return content.quiz;
+
+  const steps = content.design;
+  const firstOptions = Array.from(new Set([steps[0], ...steps.slice(1, 4), 'Random Guessing'])).slice(0, 4) as string[];
+  const secondOptions = Array.from(new Set([steps[1], steps[0], ...steps.slice(2, 5), 'Output Validation'])).slice(0, 4) as string[];
+
+  return [
+    {
+      id: `${topicId}-scenario`,
+      prompt: content.thinking.scenario,
+      options: content.thinking.options,
+      correctIndex: content.thinking.correctIndex,
+      explanation: `Use the scenario logic for ${topicTitle}.`,
+    },
+    {
+      id: `${topicId}-first`,
+      prompt: `Which step appears first in the ${topicTitle} design flow?`,
+      options: firstOptions,
+      correctIndex: Math.max(0, firstOptions.indexOf(steps[0])),
+    },
+    {
+      id: `${topicId}-second`,
+      prompt: `After "${steps[0]}", what comes next?`,
+      options: secondOptions,
+      correctIndex: Math.max(0, secondOptions.indexOf(steps[1] ?? secondOptions[0])),
+    },
+  ];
+}
+
+function ExamMode({
+  topicId,
+  title,
+  content,
+}: {
+  topicId: string;
+  title: string;
+  content?: TopicModeContent | null;
+}) {
+  const { submitExamResult, getModeProgress } = useProgress();
+  const examProgress = getModeProgress(topicId, 'Exam');
+  const quiz = useMemo(() => buildQuiz(topicId, title, content), [content, title, topicId]);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+  const allAnswered = quiz.every((question) => answers[question.id] !== undefined);
+  const percent = quiz.length ? Math.round((score / quiz.length) * 100) : 0;
+  const passed = percent >= PASSING_SCORE;
+
+  const handleSubmit = () => {
+    const nextScore = quiz.reduce(
+      (total, question) => total + (answers[question.id] === question.correctIndex ? 1 : 0),
+      0,
+    );
+
+    setScore(nextScore);
+    setSubmitted(true);
+    submitExamResult(topicId, nextScore, quiz.length);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-card p-8 border-l-4 border-characters-gojo">
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
+          <div>
+            <h3 className="text-2xl font-display font-bold text-white mb-2">Checkpoint Assessment</h3>
+            <p className="text-gray-400">{content?.exam?.question || `Complete the ${title} checkpoint quiz.`}</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-surface/40 px-4 py-3 text-right">
+            <p className="text-xs uppercase tracking-widest text-gray-500">Passing Score</p>
+            <p className="text-2xl font-display font-bold text-characters-gojo">{PASSING_SCORE}%</p>
+          </div>
+        </div>
+
+        {examProgress?.bestScore !== null && (
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-characters-gojo/20 bg-characters-gojo/10 px-4 py-2 text-sm text-characters-gojo">
+            <Trophy className="w-4 h-4" />
+            <span>Best score: {examProgress?.bestScore}%</span>
+          </div>
+        )}
+
+        <div className="space-y-5">
+          {quiz.map((question, index) => (
+            <div key={question.id} className="rounded-2xl border border-white/10 bg-surface/40 p-5">
+              <p className="text-sm text-gray-500 mb-2">
+                Question {index + 1}/{quiz.length}
+              </p>
+              <p className="text-lg text-white mb-4">{question.prompt}</p>
+
+              <div className="space-y-3">
+                {question.options.map((option, optionIndex) => {
+                  const selected = answers[question.id] === optionIndex;
+                  const correct = submitted && optionIndex === question.correctIndex;
+                  const wrong = submitted && selected && optionIndex !== question.correctIndex;
+
+                  return (
+                    <button
+                      key={optionIndex}
+                      disabled={submitted}
+                      onClick={() => setAnswers((current) => ({ ...current, [question.id]: optionIndex }))}
+                      className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                        correct
+                          ? 'border-success bg-success/10 text-success'
+                          : wrong
+                            ? 'border-accent bg-accent/10 text-accent'
+                            : selected
+                              ? 'border-characters-gojo bg-characters-gojo/10 text-white'
+                              : 'border-white/10 text-gray-200 hover:border-characters-gojo/60 hover:bg-white/5'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {submitted && question.explanation && <p className="mt-4 text-sm text-gray-400">{question.explanation}</p>}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3 justify-between items-center">
+          {!submitted ? (
+            <button
+              disabled={!allAnswered}
+              onClick={handleSubmit}
+              className="bg-characters-gojo disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-80 text-[#0d0e15] font-bold py-3 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(187,154,247,0.4)]"
+            >
+              Submit Quiz
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setAnswers({});
+                setSubmitted(false);
+                setScore(0);
+              }}
+              className="inline-flex items-center gap-2 border border-white/20 hover:bg-white/5 text-white font-bold py-3 px-5 rounded-xl transition-all"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Retake</span>
+            </button>
+          )}
+        </div>
       </div>
-      <p className="text-xl text-white mb-8">{content?.question || "Explain the trade-off between bias and variance in your own words. (5 Marks)"}</p>
-      <textarea 
-        className="w-full h-40 bg-surfaceHover border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-characters-gojo transition-colors font-sans resize-none"
-        placeholder="Type your structured answer here..."
-      />
-      <div className="mt-6 flex justify-between items-center">
-        <a href="https://gemini.google.com/gem/1z7yjRFWk9DuRcY6xGdj-wrPVPNSpnVWR?usp=sharing" target="_blank" rel="noopener noreferrer" className="inline-flex items-center space-x-2 border border-characters-gojo/50 text-characters-gojo hover:bg-characters-gojo hover:text-[#0d0e15] font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(187,154,247,0.2)]">
-          <Activity className="w-5 h-5" />
-          <span>Summon Exam Sensei (Gemini Gem)</span>
-        </a>
-        <button className="bg-characters-gojo hover:bg-opacity-80 text-[#0d0e15] font-bold py-3 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(187,154,247,0.4)]">
-          Submit Answer
-        </button>
-      </div>
+
+      {submitted && (
+        <div className={`glass-card p-6 border ${passed ? 'border-success/40' : 'border-accent/40'}`}>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm uppercase tracking-widest text-gray-500 mb-1">Exam Result</p>
+              <h4 className={`text-2xl font-display font-bold ${passed ? 'text-success' : 'text-accent'}`}>
+                {score}/{quiz.length} correct - {percent}%
+              </h4>
+              <p className="text-gray-400 mt-2">
+                {passed ? 'Checkpoint passed successfully.' : `You need ${PASSING_SCORE}% to pass this checkpoint.`}
+              </p>
+            </div>
+            {passed && <CheckCircle2 className="w-10 h-10 text-success" />}
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+}
 
 export const ModeView = () => {
-  const { moduleId, topicId, modeType } = useParams<{ moduleId: string, topicId: string, modeType: string }>();
+  const { moduleId, topicId, modeType } = useParams<{ moduleId: string; topicId: string; modeType: string }>();
   const navigate = useNavigate();
-  
-  const modeData = modes.find(m => m.type.toLowerCase() === modeType?.toLowerCase());
-  const topicData = topics[moduleId || '']?.find(t => t.id === topicId);
-  const modData = modules.find(m => m.id === moduleId);
+  const { completeMode, getModeProgress } = useProgress();
 
-  if (!modeData || !topicData) return <div className="text-center py-20 text-white">Mode not found</div>;
+  const modeData = modes.find((mode) => mode.type.toLowerCase() === modeType?.toLowerCase());
+  const topicData = getTopicById(topicId || '');
+  const modData = modules.find((module) => module.id === moduleId);
 
-  const topicContent = topicId ? mlContent[topicId] : null;
+  if (!modeData || !topicData || !moduleId || !topicId) {
+    return <div className="text-center py-20 text-white">Mode not found</div>;
+  }
+
+  const topicContent = allContent[topicId] ?? null;
+  const modeProgress = getModeProgress(topicId, modeData.type);
+  const navigation = getModeNavigation(moduleId, topicId, modeData.type);
+
+  const handleCompleteAndContinue = () => {
+    completeMode(topicId, modeData.type);
+    navigate(navigation.next?.href ?? `/dashboard/modules/${moduleId}/${topicId}`);
+  };
 
   const renderContent = () => {
-    switch(modeType?.toLowerCase()) {
-      case 'concept': return <ConceptMode title={topicData.title} content={topicContent?.concept} />;
-      case 'lab': return <LabMode content={topicContent?.lab} topicId={topicId} />;
-      case 'thinking': return <ThinkingMode content={topicContent?.thinking} />;
-      case 'design': return <DesignMode content={topicContent?.design} />;
-      case 'exam': return <ExamMode content={topicContent?.exam} />;
-      default: return <div>Content Coming Soon</div>;
+    switch (modeData.type) {
+      case 'Concept':
+        return <ConceptMode title={topicData.title} content={topicContent} />;
+      case 'Lab':
+        return <LabMode topicId={topicId} content={topicContent} />;
+      case 'Thinking':
+        return <ThinkingMode content={topicContent} />;
+      case 'Design':
+        return <DesignMode content={topicContent} />;
+      case 'Exam':
+        return <ExamMode topicId={topicId} title={topicData.title} content={topicContent} />;
+      default:
+        return <div className="text-white">Content coming soon.</div>;
     }
   };
+
+  const actionStyle = {
+    '--color': modeData.color.replace('text-', ''),
+  } as CSSProperties;
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-5xl mx-auto py-6">
       <div className="flex items-center justify-between mb-8">
         <button onClick={() => navigate(-1)} className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
           <ChevronLeft className="w-5 h-5" />
-          <span>Exit Training</span>
+          <span>Back</span>
         </button>
         <div className="flex items-center space-x-3 text-sm font-bold tracking-wider text-gray-500 uppercase">
           <span>{modData?.title}</span>
@@ -398,15 +577,20 @@ export const ModeView = () => {
       <header className="mb-12 relative flex items-center justify-between glass-card p-6 overflow-hidden">
         <div className={`absolute top-0 left-0 w-2 h-full ${modeData.color.replace('text', 'bg')}`} />
         <div className={`absolute right-0 bottom-0 w-64 h-64 blur-[100px] opacity-20 ${modeData.color.replace('text', 'bg')} pointer-events-none`} />
-        
+
         <div className="relative z-10 pl-6 space-y-2">
-          <h1 className="text-sm font-bold uppercase tracking-widest text-white/50">{modeData.title}</h1>
+          <h1 className="text-sm font-bold uppercase tracking-widest text-white/50">Learning Step</h1>
           <h2 className={`text-5xl font-display font-black tracking-tight ${modeData.color}`}>{modeData.type}</h2>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-surface/50 px-3 py-1 text-xs text-gray-300">
+            {modeProgress?.completed ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Activity className="w-3.5 h-3.5 text-info" />}
+            <span>{modeProgress?.completed ? 'Completed' : 'Available now'}</span>
+            {modeData.type === 'Exam' && modeProgress?.bestScore !== null && <span>- Best {modeProgress?.bestScore}%</span>}
+          </div>
         </div>
-        
+
         <div className="relative z-10 text-right pr-6">
-           <span className="text-gray-400 uppercase tracking-widest text-xs font-bold font-display opacity-50 block mb-1">Guiding Spirit</span>
-           <span className="text-2xl font-bold text-white capitalize font-display italic">"{modeData.character}"</span>
+          <span className="text-gray-400 uppercase tracking-widest text-xs font-bold font-display opacity-50 block mb-1">Step Type</span>
+          <span className="text-2xl font-bold text-white font-display">{modeData.title}</span>
         </div>
       </header>
 
@@ -417,13 +601,27 @@ export const ModeView = () => {
           </motion.div>
         </AnimatePresence>
       </main>
-      
-      <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
-         <button className="border border-white/20 hover:bg-white/5 text-white font-bold py-3 px-6 rounded-xl transition-all">Previous</button>
-         <button className={`bg-gradient-to-r from-surfaceHover to-surface border border-white/10 hover:border-[var(--color)] hover:shadow-[0_0_20px_var(--color-shadow)] transition-all font-bold py-3 px-8 rounded-xl flex items-center space-x-2 text-white group`} style={{ '--color': `theme('colors.${modeData.color.replace('text-', '')}')`, '--color-shadow': `theme('colors.${modeData.color.replace('text-', '')} / 20%')` } as React.CSSProperties}>
-           <span>Next Step</span>
-           <MoveRight className={`w-4 h-4 transform group-hover:translate-x-1 transition-transform`} />
-         </button>
+
+      <div className="flex justify-between items-center border-t border-white/10 pt-6 text-sm text-gray-500 gap-4">
+        <button
+          onClick={() => navigate(navigation.previous?.href ?? `/dashboard/modules/${moduleId}/${topicId}`)}
+          className="border border-white/20 hover:bg-white/5 text-white font-bold py-3 px-6 rounded-xl transition-all"
+        >
+          Previous
+        </button>
+
+        {modeData.type === 'Exam' ? (
+          <div>{navigation.next ? `Next step: ${navigation.next.topicTitle} - ${navigation.next.modeType}` : 'This is the final step in the guided path.'}</div>
+        ) : (
+          <button
+            onClick={handleCompleteAndContinue}
+            className="bg-gradient-to-r from-surfaceHover to-surface border border-white/10 hover:border-white/30 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center gap-2 group"
+            style={actionStyle}
+          >
+            <span>{modeProgress?.completed ? 'Continue' : 'Mark Complete & Continue'}</span>
+            <MoveRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          </button>
+        )}
       </div>
     </motion.div>
   );

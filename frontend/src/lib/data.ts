@@ -1,58 +1,236 @@
 import { Module, Topic, Mode } from './types';
 
 export const modules: Module[] = [
-  { id: 'ml', title: 'Machine Learning', description: 'Master algorithms and prediction models', progress: 45, icon: 'Brain', color: '#7aa2f7' },
-  { 
-    id: 'dl', 
-    title: 'Deep Learning', 
-    description: 'Delve into neural networks', 
-    progress: 10, 
-    icon: 'Network', 
+  {
+    id: 'ml',
+    title: 'Machine Learning',
+    description: 'Master algorithms and prediction models',
+    progress: 45,
+    icon: 'Brain',
+    color: '#7aa2f7',
+  },
+  {
+    id: 'dl',
+    title: 'Deep Learning',
+    description: 'Delve into neural networks and modern AI architectures',
+    progress: 10,
+    icon: 'Network',
     color: '#bb9af7',
     subModules: [
-      { id: 'sm1', title: 'Module 1 - What is Deep Learning', topics: [{ id: 't1_1', title: '1. Introduction of Deep L...', completed: false }] },
-      { id: 'sm2', title: 'Module 2 - Neural Network basics', topics: Array(5).fill({ completed: false }).map((_, i) => ({ id: `t2_${i}`, title: `Topic ${i + 1}`, completed: false })) },
-      { id: 'sm3', title: 'Module 3 - Deep Learning Hyperparameters (ANN)', topics: Array(2).fill({ completed: false }).map((_, i) => ({ id: `t3_${i}`, title: `Topic ${i + 1}`, completed: false })) },
-      { id: 'sm4', title: 'Module 4 - Convolutional Neural Network (CNN)', topics: Array(2).fill({ completed: false }).map((_, i) => ({ id: `t4_${i}`, title: `Topic ${i + 1}`, completed: false })) },
-      { id: 'sm5', title: 'Module 5 - Recurrent Neural Network (RNN)', topics: Array(4).fill({ completed: false }).map((_, i) => ({ id: `t5_${i}`, title: `Topic ${i + 1}`, completed: false })) },
-      { id: 'sm6', title: 'Module 6 - Computer Vision (CV)', topics: [{ id: 't6_1', title: 'Topic 1', completed: false }] },
-    ]
+      {
+        id: 'dl_sm1',
+        title: 'Module 1 – What is Deep Learning?',
+        topics: [
+          { id: 'dl_t1', title: 'Introduction to Deep Learning', completed: false },
+          { id: 'dl_t2', title: 'Deep Learning vs Machine Learning', completed: false },
+        ],
+      },
+      {
+        id: 'dl_sm2',
+        title: 'Module 2 – Neural Network Basics',
+        topics: [
+          { id: 'dl_t3', title: 'Perceptrons & Neurons', completed: false },
+          { id: 'dl_t4', title: 'Activation Functions', completed: false },
+          { id: 'dl_t5', title: 'Forward Propagation', completed: false },
+          { id: 'dl_t6', title: 'Backpropagation', completed: false },
+          { id: 'dl_t7', title: 'Loss Functions', completed: false },
+        ],
+      },
+      {
+        id: 'dl_sm3',
+        title: 'Module 3 – Deep Learning Hyperparameters (ANN)',
+        topics: [
+          { id: 'dl_t8', title: 'Learning Rate & Optimizers', completed: false },
+          { id: 'dl_t9', title: 'Regularization (Dropout & Batch Norm)', completed: false },
+        ],
+      },
+      {
+        id: 'dl_sm4',
+        title: 'Module 4 – Convolutional Neural Networks (CNN)',
+        topics: [
+          { id: 'dl_t10', title: 'Convolution & Pooling Layers', completed: false },
+          { id: 'dl_t11', title: 'CNN Architectures (VGG, ResNet)', completed: false },
+        ],
+      },
+      {
+        id: 'dl_sm5',
+        title: 'Module 5 – Recurrent Neural Networks (RNN)',
+        topics: [
+          { id: 'dl_t12', title: 'Sequence Modeling & RNNs', completed: false },
+          { id: 'dl_t13', title: 'LSTMs & GRUs', completed: false },
+          { id: 'dl_t14', title: 'Vanishing Gradient Problem', completed: false },
+          { id: 'dl_t15', title: 'Encoder-Decoder Architecture', completed: false },
+        ],
+      },
+      {
+        id: 'dl_sm6',
+        title: 'Module 6 – Computer Vision (CV)',
+        topics: [
+          { id: 'dl_t16', title: 'Object Detection (YOLO, R-CNN)', completed: false },
+        ],
+      },
+    ],
   },
-  { id: 'sql', title: 'SQL', description: 'Data querying and manipulation', progress: 80, icon: 'Database', color: '#9ece6a' },
-  { 
-    id: 'genai', 
-    title: 'GEN AI', 
-    description: 'Create art and text with AI', 
-    progress: 20, 
-    icon: 'Sparkles', 
+  {
+    id: 'genai',
+    title: 'GEN AI',
+    description: 'Create art and text with cutting-edge generative AI',
+    progress: 20,
+    icon: 'Sparkles',
     color: '#f7768e',
     subModules: [
-      { id: 'gsm1', title: 'Foundations', topics: [{ id: 'gt1', title: '1. Introduction to Generative AI', completed: false }, { id: 'gt2', title: '2. Discriminative vs Generative Models', completed: false }] },
-      { id: 'gsm2', title: 'LLM Basics', topics: [{ id: 'gt3', title: '3. Large Language Models (LLMs)', completed: false }, { id: 'gt4', title: '4. Tokenization', completed: false }, { id: 'gt5', title: '5. Transformer Architecture', completed: false }, { id: 'gt6', title: '6. Attention Mechanism', completed: false }] },
-      { id: 'gsm3', title: 'Prompt Engineering', topics: [{ id: 'gt7', title: '7. Prompt Engineering Basics', completed: false }, { id: 'gt8', title: '8. Prompt Patterns', completed: false }] },
-      { id: 'gsm4', title: 'LLM Parameters', topics: [{ id: 'gt9', title: '9. Temperature', completed: false }, { id: 'gt10', title: '10. Context Window', completed: false }] },
-      { id: 'gsm5', title: 'Embeddings', topics: [{ id: 'gt11', title: '11. Embeddings', completed: false }, { id: 'gt12', title: '12. Vector Similarity', completed: false }] },
-      { id: 'gsm6', title: 'Retrieval Systems', topics: [{ id: 'gt13', title: '13. Retrieval Augmented Generation (RAG)', completed: false }] },
-      { id: 'gsm7', title: 'Tools & Frameworks', topics: [{ id: 'gt14', title: '14. LangChain Overview', completed: false }, { id: 'gt15', title: '15. Vector Databases', completed: false }] },
-      { id: 'gsm8', title: 'AI Systems', topics: [{ id: 'gt16', title: '16. AI Chatbots', completed: false }, { id: 'gt17', title: '17. AI Agents', completed: false }] },
-    ]
+      {
+        id: 'genai_sm1',
+        title: 'Foundations',
+        topics: [
+          { id: 'genai_t1', title: 'Introduction to Generative AI', completed: false },
+          { id: 'genai_t2', title: 'Discriminative vs Generative Models', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm2',
+        title: 'LLM Basics',
+        topics: [
+          { id: 'genai_t3', title: 'Large Language Models (LLMs)', completed: false },
+          { id: 'genai_t4', title: 'Tokenization', completed: false },
+          { id: 'genai_t5', title: 'Transformer Architecture', completed: false },
+          { id: 'genai_t6', title: 'Attention Mechanism', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm3',
+        title: 'Prompt Engineering',
+        topics: [
+          { id: 'genai_t7', title: 'Prompt Engineering Basics', completed: false },
+          { id: 'genai_t8', title: 'Prompt Patterns & Chain of Thought', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm4',
+        title: 'LLM Parameters',
+        topics: [
+          { id: 'genai_t9', title: 'Temperature & Sampling', completed: false },
+          { id: 'genai_t10', title: 'Context Window & Token Limits', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm5',
+        title: 'Embeddings',
+        topics: [
+          { id: 'genai_t11', title: 'Embeddings & Semantic Search', completed: false },
+          { id: 'genai_t12', title: 'Vector Similarity', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm6',
+        title: 'Retrieval Systems',
+        topics: [
+          { id: 'genai_t13', title: 'Retrieval Augmented Generation (RAG)', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm7',
+        title: 'Tools & Frameworks',
+        topics: [
+          { id: 'genai_t14', title: 'LangChain Overview', completed: false },
+          { id: 'genai_t15', title: 'Vector Databases (Pinecone, Weaviate)', completed: false },
+        ],
+      },
+      {
+        id: 'genai_sm8',
+        title: 'AI Systems',
+        topics: [
+          { id: 'genai_t16', title: 'AI Chatbots & Conversation Design', completed: false },
+          { id: 'genai_t17', title: 'AI Agents & Tool Use', completed: false },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sql',
+    title: 'SQL',
+    description: 'Query, join, optimize, and reason about relational data systems',
+    progress: 15,
+    icon: 'Database',
+    color: '#9ece6a',
+  },
+  {
+    id: 'agentic',
+    title: 'Agentic AI',
+    description: 'Build tool-using AI systems that plan, act, recover, and stay safe',
+    progress: 8,
+    icon: 'Bot',
+    color: '#e0af68',
   },
 ];
 
+// Flat topics for modules that don't use subModules.
 export const topics: Record<string, Topic[]> = {
   ml: [
-    { id: 't1', title: 'Linear Regression', completed: true },
-    { id: 't2', title: 'Classification', completed: false },
-    { id: 't3', title: 'Overfitting', completed: false },
-    { id: 't4', title: 'Decision Trees', completed: false },
+    { id: 'ml_t1', title: 'Linear Regression', completed: true },
+    { id: 'ml_t2', title: 'Classification', completed: false },
+    { id: 'ml_t3', title: 'Overfitting & Regularization', completed: false },
+    { id: 'ml_t4', title: 'Decision Trees & Random Forests', completed: false },
+    { id: 'ml_t5', title: 'Support Vector Machines (SVM)', completed: false },
+    { id: 'ml_t6', title: 'K-Means Clustering', completed: false },
+    { id: 'ml_t7', title: 'Model Evaluation & Metrics', completed: false },
   ],
   sql: [
-    { id: 't11', title: 'SELECT statements', completed: false },
-    { id: 't12', title: 'Table JOINs', completed: false }
-  ]
+    { id: 'sql_t1', title: 'SELECT, WHERE & ORDER BY', completed: false },
+    { id: 'sql_t2', title: 'JOINs & Relational Thinking', completed: false },
+    { id: 'sql_t3', title: 'Aggregation, GROUP BY & HAVING', completed: false },
+    { id: 'sql_t4', title: 'Subqueries & CTEs', completed: false },
+    { id: 'sql_t5', title: 'Indexes & Query Optimization', completed: false },
+    { id: 'sql_t6', title: 'Transactions, ACID & Concurrency', completed: false },
+  ],
+  agentic: [
+    { id: 'agentic_t1', title: 'What Is an AI Agent?', completed: false },
+    { id: 'agentic_t2', title: 'Tool Use & Function Calling', completed: false },
+    { id: 'agentic_t3', title: 'Planning, ReAct & Control Loops', completed: false },
+    { id: 'agentic_t4', title: 'Memory, State & Context Management', completed: false },
+    { id: 'agentic_t5', title: 'Multi-Agent Systems', completed: false },
+    { id: 'agentic_t6', title: 'Evaluation, Guardrails & Reliability', completed: false },
+  ],
 };
 
+// Helper: get a topic by ID from any module (handles subModules too)
+export function getTopicById(topicId: string): Topic | undefined {
+  // Search flat topics
+  for (const moduleTopics of Object.values(topics)) {
+    const found = moduleTopics.find((t) => t.id === topicId);
+    if (found) return found;
+  }
+  // Search subModules
+  for (const mod of modules) {
+    if (mod.subModules) {
+      for (const sm of mod.subModules) {
+        const found = sm.topics.find((t) => t.id === topicId);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+}
 
+export function getTopicsForModule(moduleId: string): Topic[] {
+  const moduleTopics = topics[moduleId];
+  if (moduleTopics) return moduleTopics;
+
+  const moduleData = modules.find((mod) => mod.id === moduleId);
+  if (!moduleData?.subModules) return [];
+
+  return moduleData.subModules.flatMap((subModule) => subModule.topics);
+}
+
+export function getOrderedTopicEntries(): Array<{ moduleId: string; moduleTitle: string; topic: Topic }> {
+  return modules.flatMap((module) =>
+    getTopicsForModule(module.id).map((topic) => ({
+      moduleId: module.id,
+      moduleTitle: module.title,
+      topic,
+    })),
+  );
+}
 
 export const modes: Mode[] = [
   { id: 'm1', type: 'Concept', title: 'Understand the Core', character: 'naruto', description: 'Learn the fundamentals with short explanations and visuals.', completed: false, color: 'text-characters-naruto' },

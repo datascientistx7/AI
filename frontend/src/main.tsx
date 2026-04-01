@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
+import { ProgressProvider } from './lib/progress.tsx'
 
 class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error: any}> {
   constructor(props: any) {
@@ -31,9 +32,11 @@ class ErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean,
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ProgressProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ProgressProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 )
